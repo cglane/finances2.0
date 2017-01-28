@@ -8,7 +8,6 @@ from scipy.sparse import coo_matrix, hstack
 # {'date':'Date','value':'Amount Salary','location':'Description II', 'description':'Description'})
 financesPath = './csvFiles/finances.csv'
 data_dict = readCsv.readCSV(financesPath).valuesLocationsDescriptions({'location':'Description II','value':['Amount Salary','Amount BankSC','13 Drews Ct.','Work Related/Other'],'description':'Description'})
-
 def training_feature(vectorizer,location,value):
     location_matrix = vectorizer.transform([location])
     value_matrix = coo_matrix([value])
@@ -28,7 +27,12 @@ def train_data(data_dict):
     clf.fit(features, labels)
     return clf,vectorizer
 
+# def predictDescription(inputList):
+#     for value in inputList:
+
+input_headers = {'date':0,'location':2,'value':7}
+inputList = readCsv.readCSV('./csvFiles/creditCard.csv',header = None,source = 'Amex').dateValueLocation(input_headers)
 clf,vectorizer = train_data(data_dict)
-predict_array = training_feature(vectorizer,'shell',-3.21)
-print predict_array
-print clf.predict(predict_array)
+for item in inputList:
+    predict_array = training_feature(vectorizer,(item['location'].split('-')[0]),(item['value']*-1))
+    print (item['location'],item['value'],clf.predict(predict_array))

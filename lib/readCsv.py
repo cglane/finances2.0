@@ -12,19 +12,34 @@ def extendValues(myList):
     else:
         return [0]
 
+def formatDate(myList,source):
+    if source == 'Amex':
+        ###Only return month/day/year format
+        return [x.split('  ')[0] for x in myList]
+    elif source == 'Finances':
+        return myList
+
+def formatLocation(myList,source):
+    if source == 'Amex':
+        ###Remove city and state from location description
+        return [x.split('-')[0] for x in myList]
+    elif source == 'Finances':
+        return myList
+
 class readCSV(object):
     """Read CSV with pandas"""
-    def __init__(self, fileName):
-        self.file = pd.read_csv(fileName)
+    def __init__(self, fileName, header = 'infer',source ='Finances'):
+        self.file = pd.read_csv(fileName, header = header)
+        self.source = source
     def __str__(self):
         return str(self.file.head(n=3))
     def columns(self):
         return self.file.columns
     def dateValueLocation(self,columns):
-        dates = self.file[columns['date']].fillna('Empty Date')
+        dates = formatDate(self.file[columns['date']].fillna('Empty Date'),self.source)
         values = self.file[columns['value']].fillna(0)
-        locations = self.file[columns['location']].fillna('no location')
-        return [tuple(x) for x in zip(dates,values,locations)]
+        locations = formatLocation(self.file[columns['location']].fillna('no location'),self.source)
+        return [{'date':x[0],'value':x[1],'location':x[2]} for x in zip(dates,values,locations)]
     def dateValueLocationDescription(self,columns):
         dates = self.file[columns['date']].fillna('Empty Date')
         values = self.file[columns['value']].fillna(0)
